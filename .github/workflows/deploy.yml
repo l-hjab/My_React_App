@@ -2,37 +2,29 @@ name: Deploy to SFTP
 
 on:
   push:
-    branches: [main]  # Deploy when you push to main branch
+    branches: [main]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
-      # Step 1: Get your code
       - uses: actions/checkout@v3
       
-      # Step 2: Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22'
       
-      # Step 3: Install dependencies
       - name: Install dependencies
         run: npm install
       
-      # Step 4: Build the project
       - name: Build project
         run: npm run build
       
-      # Step 5: Deploy to SFTP
+      - name: Install lftp
+        run: sudo apt-get update && sudo apt-get install -y lftp
+      
       - name: Deploy to SFTP
-        uses: milanmk/actions-file-deployer@master
-        with:
-          remote-url: ${{ secrets.SFTP_HOST }}
-          remote-user: ${{ secrets.SFTP_USER }}
-          remote-password: ${{ secrets.SFTP_PASSWORD }}
-          remote-port: ${{ secrets.SFTP_PORT }}
-          local-path: './dist/'
-          remote-path: ${{ secrets.SFTP_PATH }}
+        run: |
+          lftp -e "set sftp:auto-confirm yes; set sftp:connect-program 'ssh -p ${{ secrets.SFTP_PORT }}'; open sftp://${{ secrets.SFTP_USER }}:${{ secrets.SFTP_PASSWORD }}@${{ secrets.SFTP_HOST }}; cd ${{ secrets.SFTP_PATH }}; mirror -R dist . ; quit"
