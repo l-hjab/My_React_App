@@ -27,4 +27,4 @@ jobs:
       
       - name: Deploy to SFTP
         run: |
-          lftp -e "set sftp:auto-confirm yes; set sftp:connect-program 'ssh -p ${{ secrets.SFTP_PORT }}'; open sftp://${{ secrets.SFTP_USER }}:${{ secrets.SFTP_PASSWORD }}@${{ secrets.SFTP_HOST }}; cd ${{ secrets.SFTP_PATH }}; mirror -R dist . ; quit"
+          lftp -e "set sftp:auto-confirm yes; set sftp:connect-program 'ssh -p ${{ secrets.SFTP_PORT }}'; open sftp://${{ secrets.SFTP_USERNAME }}:${{ secrets.SFTP_PASSWORD }}@${{ secrets.SFTP_SERVER }}; cd ${{ secrets.SFTP_PATH }}; mirror -R dist . ; quit"
