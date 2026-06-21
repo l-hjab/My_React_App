@@ -35,4 +35,4 @@ jobs:
           remote-password: ${{ secrets.SFTP_PASSWORD }}
           remote-port: ${{ secrets.SFTP_PORT }}
           local-path: './dist/'
-          remote-path: ${{ secrets.FTP_PATH }}
+          remote-path: ${{ secrets.SFTP_PATH }}
