@@ -1,0 +1,38 @@
+name: Deploy to FTP
+
+on:
+  push:
+    branches: [main]  # Deploy when you push to main branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Get your code
+      - uses: actions/checkout@v3
+      
+      # Step 2: Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+      
+      # Step 4: Build the project
+      - name: Build project
+        run: npm run build
+      
+      # Step 5: Deploy to SFTP
+      - name: Deploy to SFTP
+        uses: milanmk/actions-file-deployer@master
+        with:
+          remote-url: ${{ secrets.SFTP_HOST }}
+          remote-user: ${{ secrets.SFTP_USER }}
+          remote-password: ${{ secrets.SFTP_PASSWORD }}
+          remote-port: ${{ secrets.SFTP_PORT }}
+          local-path: './dist/'
+          remote-path: ${{ secrets.FTP_PATH }}
