@@ -1,0 +1,30 @@
+name: Deploy to SFTP
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Build project
+        run: npm run build
+      
+      - name: Install lftp
+        run: sudo apt-get update && sudo apt-get install -y lftp
+      
+      - name: Deploy to SFTP
+        run: |
+          lftp -e "set sftp:auto-confirm yes; set sftp:connect-program 'ssh -p ${{ secrets.SFTP_PORT }}'; open sftp://${{ secrets.SFTP_USERNAME }}:${{ secrets.SFTP_PASSWORD }}@${{ secrets.SFTP_SERVER }}; cd ${{ secrets.SFTP_PATH }}; mirror -R dist . ; quit"
