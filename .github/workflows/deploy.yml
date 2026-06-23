@@ -1,5 +1,4 @@
 name: Deploy to SFTP
-
 on:
   push:
     branches: [main]
@@ -7,29 +6,36 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22'
-      
+
       - name: Install dependencies
         run: npm install
-      
+
       - name: Build project
         run: npm run build
-      
+
       - name: Install lftp
         run: sudo apt-get update && sudo apt-get install -y lftp
-      
+
       - name: Deploy to SFTP
         timeout-minutes: 10
         run: |
-          echo "Connecting to SFTP server..."
           lftp -u "${{ secrets.SFTP_USERNAME }}","${{ secrets.SFTP_PASSWORD }}" \
             -p "${{ secrets.SFTP_PORT }}" \
-            sftp://"${{ secrets.SFTP_SERVER }}" \
-            -e "set net:timeout 30; set net:max-retries 2; cd ${{ secrets.SFTP_PATH }}; mirror -R dist .; quit" || echo "SFTP deployment completed"
+            sftp://"${{ secrets.SFTP_HOST }}" << 'EOF'
+            set net:timeout 30
+            set net:max-retries 3
+            set net:reconnect-interval-base 5
+            set sftp:auto-confirm yes
+            set mirror:overwrite yes
+            cd /home/obohzjcx/daph.acknamasolischool.com/
+            mirror -R --overwrite --ignore-time --verbose dist/ .
+            quit
+          EOF
